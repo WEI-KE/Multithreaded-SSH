@@ -210,9 +210,9 @@ def main():
 
     username = 'admin'
     #  = getpass.getuser('请输入用户名')
-    password = getpass.getpass(prompt='请输入交换机密码用"空格"分隔（最多不超过3个）:', ).split(' ')
+    password = getpass.getpass(prompt='请输入设备密码 用"空格"分隔（最多不超过3个）:', ).split(' ')
     # password = 'admin@123'
-    # password = input('请输入交换机密码用"空格"分隔（最多不超过3个）:').split(' ')
+    # password = input('请输入设备密码 用"空格"分隔（最多不超过3个）:').split(' ')
     # commands = [
     #     'dis version',
     #     'dis int br',
