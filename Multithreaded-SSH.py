@@ -108,6 +108,7 @@ def ssh(host='localhost', port=22, username='admin', password='admin@123', timeo
 
             # 执行远程命令
             for command in commands:
+                command = command.replace(r'\n', '\n')
                 shell.send((command + '\n').encode('utf-8'))
                 time.sleep(0.5)  # 等待命令执行完成
 
