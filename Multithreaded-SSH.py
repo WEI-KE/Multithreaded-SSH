@@ -11,16 +11,22 @@ import logging
 
 success_count = 0
 error_count = 0
+command_error = 0
 
 
-def ssh(host='localhost', port=22, username='admin', password='admin@123', timeout=20, commands='dis ver'):
+class CommandTimeoutError(Exception):
+    pass
+
+
+def ssh(host='localhost', port=22, username='admin', password='admin@123', timeout=20, commands='dis ver',
+        command_time_out=60):
     # 配置logging记录paramiko详细日志
     logging.basicConfig(level=logging.DEBUG, filename=f'log/paramiko-{datetime.date.today()}.log', filemode='w',
                         format='%(asctime)s - %(levelname)s - %(message)s')
 
     log_change = []
 
-    global success_count, error_count
+    global success_count, error_count, command_error
 
     # 创建日志目录和文件
     os.makedirs('log', exist_ok=True)
@@ -108,6 +114,7 @@ def ssh(host='localhost', port=22, username='admin', password='admin@123', timeo
 
             # 执行远程命令
             for command in commands:
+                break_count = 0
                 command = command.replace(r'\n', '\n')
                 shell.send((command + '\n').encode('utf-8'))
                 time.sleep(0.5)  # 等待命令执行完成
@@ -120,9 +127,13 @@ def ssh(host='localhost', port=22, username='admin', password='admin@123', timeo
                             break
                         elif '[' + hostname in output:
                             break
-
-                    else:
-                        time.sleep(0.5)
+                    if break_count >= command_time_out:
+                        with open(sshlog_file, 'a') as f_sshlog:
+                            f_sshlog.write(f'{output}')
+                        command_error += 1
+                        raise CommandTimeoutError(f'{command}')
+                    break_count += 1
+                    time.sleep(1)
                 with open(sshlog_file, 'a') as f_sshlog:
                     f_sshlog.write(f'{output}')
                 # 写入日志文件
@@ -170,6 +181,9 @@ def ssh(host='localhost', port=22, username='admin', password='admin@123', timeo
             log_change.append(f'连接超时：{host}, {str(e)}\n')
             break_tag = True
 
+        except CommandTimeoutError as e:
+            log_change.append(f'命令执行超时，跳过主机：{host}, {str(e)}\n')
+
         except Exception as e:
             print(f'未知错误：{host}, {str(e)}')
             log_change.append(f'遇到未知错误：{host}, {str(e)}\n')
@@ -211,9 +225,9 @@ def main():
 
     username = 'admin'
     #  = getpass.getuser('请输入用户名')
-    password = getpass.getpass(prompt='请输入设备密码 用"空格"分隔（最多不超过3个）:', ).split(' ')
+    password = getpass.getpass(prompt='请输入设备密码用"空格"分隔（最多不超过3个）:', ).split(' ')
     # password = 'admin@123'
-    # password = input('请输入设备密码 用"空格"分隔（最多不超过3个）:').split(' ')
+    # password = input('请输入设备密码用"空格"分隔（最多不超过3个）:').split(' ')
     # commands = [
     #     'dis version',
     #     'dis int br',
@@ -238,9 +252,9 @@ def main():
     for thread in threads:
         thread.join()
 
-    print(f'运行结束,共{str(len(hosts))}台主机，成功{success_count}台，错误{error_count}')
+    print(f'运行结束,共{str(len(hosts))}台主机，成功{success_count}台，错误{error_count}，命令执行错误{command_error}')
     with open(log_file, 'a') as f_log:
-        f_log.write(f'运行结束,共{str(len(hosts))}台主机，成功{success_count}台，错误{error_count}\n')
+        f_log.write(f'运行结束,共{str(len(hosts))}台主机，成功{success_count}，错误{error_count}，命令执行错误{command_error}\n')
     input("完成！按回车退出...")
 
 
