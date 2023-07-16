@@ -1,4 +1,4 @@
-# Multithreaded-SSH
+# Multithreaded_SSH
 由ChatGPT 总结：该代码是一个Python脚本，用于与网络设备（特别是交换机）建立SSH连接并执行命令。它使用Paramiko库实现SSH连接和命令执行的功能。脚本从文本文件中读取主机地址列表和命令列表，创建多个线程来处理连接，并记录成功和错误的连接数量。代码提供基本的日志记录功能，支持基于密码的身份验证。可以进一步定制代码以启用额外的功能，如日志记录、密钥验证和错误处理。
 
 详细介绍：https://weike.club/categories/multithreaded_ssh/
