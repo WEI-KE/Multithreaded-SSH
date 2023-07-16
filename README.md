@@ -6,4 +6,4 @@
 Summarized by ChatGPT:
 The code is a Python script that establishes SSH connections to network devices (specifically switches) and executes commands on them. It utilizes the Paramiko library for SSH connectivity and command execution. The script reads a list of host addresses and commands from text files, creates multiple threads to handle the connections, and records the success and error counts. The code provides basic logging functionality and supports password-based authentication. It can be further customized to enable additional features like logging, key validation, and error handling.
 
-detail：https://weike.club/categories/multithreaded_ssh/
+detail：https://weike.club/en/categories/multithreaded_ssh/
