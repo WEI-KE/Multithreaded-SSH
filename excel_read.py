@@ -19,14 +19,17 @@ def find_column_by_value(sheet, value):
     return None
 
 
-# Find the rows where the value is located in a specific column
-def find_rows_by_value(sheet, column_letter, value):
-    column_index = column_index_from_string(column_letter) - 1  # Convert to column index
+# Find rows based on column and value
+def find_rows_by_value(sheet, column, value, accept_empty=False):
+    column_index = column_index_from_string(column) - 1  # Convert to column index
     rows = []
     for row_index, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
         cell_value = row[column_index]
-        if cell_value != value:
+        if cell_value == value:
             rows.append(row_index)
+        elif cell_value is None:
+            if accept_empty:
+                rows.append(row_index)
 
     return rows
 
@@ -40,17 +43,17 @@ def process_excel_file(file_path=None, sheet=None, return_info=False, print_info
 
     try:
         workbook = load_workbook(file_path)
+        sheet = workbook[sheet]
     except Exception as e:
         raise CustomError('Error reading the file')
-    sheet = workbook[sheet]
 
-    headers_to_find = ['IP', 'Username']
+    headers_to_find = ['Hostname', 'Address', 'Username']
     header_dict = {}
 
     # Find the columns with the headers
     for header in headers_to_find:
         column = find_column_by_value(sheet, header)
-        if column is None:
+        if column is None and header != 'Hostname':
             raise CustomError(f'Error finding {header}')
         if column:
             header_dict[header] = column
@@ -105,7 +108,8 @@ def process_excel_file(file_path=None, sheet=None, return_info=False, print_info
 
     all_hosts = []
     for row_number in enable_row_numbers:
-        single_host_dict = {'IP': sheet[header_dict['IP'] + str(row_number)].value,
+        single_host_dict = {'Hostname': sheet[header_dict['Hostname'] + str(row_number)].value,
+                            'IP': sheet[header_dict['IP'] + str(row_number)].value,
                             'Username': sheet[header_dict['Username'] + str(row_number)].value}
         for numbered_header in numbered_header_dict:
             cell_value = sheet[numbered_header_dict[numbered_header] + str(row_number)].value
