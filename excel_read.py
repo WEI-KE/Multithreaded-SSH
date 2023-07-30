@@ -38,7 +38,7 @@ def process_excel_file(file_path=None, sheet=None, return_info=False, print_info
     if file_path is None:
         file_path = 'SSH.xlsx'
     if sheet is None:
-        sheet = 'sheet1'
+        sheet = 'Sheet1'
     info_to_return = []
 
     try:
@@ -71,7 +71,7 @@ def process_excel_file(file_path=None, sheet=None, return_info=False, print_info
     if print_info:
         print(f'Enable flag found in column {ssh_enabled_column}')
     # Find the rows with the enable flag
-    enable_row_numbers = find_rows_by_value(sheet, ssh_enabled_column, False)
+    enable_row_numbers = find_rows_by_value(sheet, ssh_enabled_column, True, True)
     if not enable_row_numbers:
         raise CustomError('No enable rows found')
 
@@ -109,7 +109,7 @@ def process_excel_file(file_path=None, sheet=None, return_info=False, print_info
     all_hosts = []
     for row_number in enable_row_numbers:
         single_host_dict = {'Hostname': sheet[header_dict['Hostname'] + str(row_number)].value,
-                            'IP': sheet[header_dict['IP'] + str(row_number)].value,
+                            'Address': sheet[header_dict['Address'] + str(row_number)].value,
                             'Username': sheet[header_dict['Username'] + str(row_number)].value}
         for numbered_header in numbered_header_dict:
             cell_value = sheet[numbered_header_dict[numbered_header] + str(row_number)].value
@@ -125,3 +125,4 @@ def process_excel_file(file_path=None, sheet=None, return_info=False, print_info
 if __name__ == "__main__":
     result = process_excel_file(None, None, False, True)
     print(result)
+    print(f'共{str(len(result))}条')
