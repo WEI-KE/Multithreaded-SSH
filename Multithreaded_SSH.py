@@ -255,8 +255,8 @@ def txt():
 
     # Create threads
     threads = []
-    for host in hosts:
-        thread = threading.Thread(target=ssh, kwargs={'address': host, 'username': username, 'passwords': passwords,
+    for address in hosts:
+        thread = threading.Thread(target=ssh, kwargs={'address': address, 'username': username, 'passwords': passwords,
                                                       'commands': commands})
         threads.append(thread)
         # time.sleep(0.2)
@@ -287,6 +287,10 @@ def excel(excel_file='SSH.xlsx', sheet='Sheet1'):
     os.makedirs('log', exist_ok=True)
     log_file = f'log/{datetime.date.today()}.txt'
 
+    print(f'Program start time: {datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]}')
+    with open(log_file, 'a', encoding='utf-8') as f_log:
+        f_log.write(f'Program start time: {datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]}\n')
+
     # password = input('Enter device password (separated by "space", up to 3):').split(' ')
     passwords = getpass.getpass(prompt='Enter device password (separated by "space", up to 3):').split(' ')
     if passwords == ['']:
@@ -302,10 +306,16 @@ def excel(excel_file='SSH.xlsx', sheet='Sheet1'):
                 commands[command_num] = command
             if 'end' in command_num:
                 ends[command_num] = command
-        thread = threading.Thread(target=ssh,
-                                  kwargs={'hostname': host['hostname'], 'address': host['Address'],
-                                          'username': host['Username'], 'passwords': passwords, 'commands': commands,
-                                          'ends': ends})
+        if host['Hostname']:
+            thread = threading.Thread(target=ssh,
+                                      kwargs={'hostname': host['Hostname'], 'address': host['Address'],
+                                              'username': host['Username'], 'passwords': passwords,
+                                              'commands': commands, 'ends': ends})
+        else:
+            thread = threading.Thread(target=ssh,
+                                      kwargs={'address': host['Address'],
+                                              'username': host['Username'], 'passwords': passwords,
+                                              'commands': commands, 'ends': ends})
         threads.append(thread)
         # time.sleep(0.2)
         thread.start()
